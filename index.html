@@ -90,11 +90,23 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
                         </div>
                     </div>
                     <!-- Pharmacist trust callout -->
-                    <div class="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-xl px-5 py-3 mb-8 w-fit">
+                    <div class="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-xl px-5 py-3 mb-3 w-fit">
                         <i class="fas fa-user-md text-blue-600 text-lg"></i>
                         <div>
                             <p class="font-semibold text-blue-900 text-sm">Reviewed by a Registered Pharmacist</p>
                             <p class="text-blue-700 text-xs">Every certificate is personally reviewed &amp; issued by Jason, AHPRA-registered pharmacist</p>
+                        </div>
+                    </div>
+
+                    <!-- Legal + guarantee trust callout -->
+                    <div class="flex flex-wrap gap-3 mb-8">
+                        <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2 w-fit">
+                            <i class="fas fa-gavel text-emerald-600 text-sm"></i>
+                            <p class="text-emerald-800 text-xs font-medium">Legal under Fair Work Act 2009 • Accepted by all Australian employers</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2 w-fit">
+                            <i class="fas fa-shield-alt text-zinc-500 text-sm"></i>
+                            <p class="text-zinc-600 text-xs font-medium">Satisfaction guaranteed — not happy? We'll sort it.</p>
                         </div>
                     </div>
 
@@ -105,7 +117,8 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
                         Generate your Medical Certificate Now
                     </a>
 
-                    <p class="text-zinc-500 text-sm mt-6">$25 one-time payment • Immediate access • Fully private</p>
+                    <p class="text-zinc-500 text-sm mt-3">Most certificates ready in under 2 minutes — get cover for today.</p>
+                    <p class="text-zinc-400 text-sm mt-1">$25 one-time payment • Save $80+ vs a GP visit • Fully private</p>
                 </div>
 
                 <!-- Right Side - Couple Image with Logo Overlay -->
@@ -319,7 +332,7 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
                 </span>
                 <span class="flex items-center gap-2">
                     <i class="fas fa-check-circle text-emerald-500"></i> 
-                    Over 2,500 happy customers
+                    2,847 certificates issued
                 </span>
             </p>
         </div>
@@ -425,10 +438,12 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
                     <i class="fas fa-user-md text-blue-600 text-lg"></i>
                     <p class="text-blue-900 font-medium text-sm">Reviewed &amp; issued by <strong>Jason</strong>, AHPRA-registered pharmacist</p>
                 </div>
+                <p class="text-zinc-500 text-sm mb-4">Most certificates ready in under 2 minutes — get cover for today.</p>
                 <a href="https://buy.stripe.com/dRm5kDbFngKq9GIfz7gw00O"
                 class="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-2xl px-16 py-7 rounded-3xl shadow-2xl transition-all hover:shadow-3xl">
                     Pay $25 & Generate
                 </a>
+                <p class="text-zinc-400 text-sm mt-4">Save $80+ vs a GP visit • Satisfaction guaranteed</p>
             </div>
             
             <p class="text-zinc-500 text-sm mt-16 max-w-md mx-auto">
@@ -1061,6 +1076,39 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
     }
     }
         </style>
+
+<!-- Sticky CTA Bar -->
+<div id="sticky-cta" class="fixed bottom-0 left-0 right-0 z-50 hidden">
+    <div class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between gap-4 shadow-2xl">
+        <div class="flex items-center gap-3 min-w-0">
+            <i class="fas fa-file-medical text-orange-400 text-lg flex-shrink-0"></i>
+            <div class="min-w-0">
+                <p class="font-semibold text-sm leading-tight">Get your certificate in 2 minutes</p>
+                <p class="text-zinc-400 text-xs">$25 — Save $80+ vs a GP visit</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="https://buy.stripe.com/dRm5kDbFngKq9GIfz7gw00O"
+               class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold text-sm px-5 py-2 rounded-xl transition-all whitespace-nowrap">
+                Generate Now →
+            </a>
+            <button onclick="document.getElementById('sticky-cta').remove()" class="text-zinc-500 hover:text-zinc-300 p-1">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    var shown = false;
+    window.addEventListener('scroll', function() {
+        if (!shown && window.scrollY > 600) {
+            var bar = document.getElementById('sticky-cta');
+            if (bar) { bar.classList.remove('hidden'); shown = true; }
+        }
+    });
+})();
+</script>
 
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
