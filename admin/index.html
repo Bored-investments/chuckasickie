@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Chuck A Sickie — Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .nav-item { @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer transition-all; }
+    .nav-item.active { @apply text-white bg-zinc-800; }
+    .stat-card { @apply bg-zinc-900 border border-zinc-800 rounded-2xl p-6; }
+    .tab { @apply hidden; }
+    .tab.active { @apply block; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen">
+
+<!-- ─── LOGIN ─── -->
+<div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">🦘</div>
+      <h1 class="text-2xl font-bold">Chuck A Sickie</h1>
+      <p class="text-zinc-400 text-sm mt-1">Admin Dashboard</p>
+    </div>
+    <form id="login-form" class="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-zinc-400 mb-2">Username</label>
+        <input id="login-username" type="text" autocomplete="username"
+          class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors"
+          placeholder="Username">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-zinc-400 mb-2">Password</label>
+        <input id="login-password" type="password" autocomplete="current-password"
+          class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors"
+          placeholder="Password">
+      </div>
+      <p id="login-error" class="text-red-400 text-sm hidden">Invalid username or password.</p>
+      <button type="submit"
+        class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold py-3 rounded-xl transition-all">
+        Sign In
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ─── DASHBOARD ─── -->
+<div id="dashboard-page" class="hidden flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-56 bg-zinc-900 border-r border-zinc-800 flex flex-col flex-shrink-0">
+    <div class="p-5 border-b border-zinc-800">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center text-lg">🦘</div>
+        <div>
+          <p class="font-semibold text-sm leading-tight">Chuck A Sickie</p>
+          <p class="text-zinc-500 text-xs">Admin</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-3 space-y-0.5">
+      <div class="nav-item active" onclick="showTab('overview')">
+        <i class="fas fa-chart-line w-4 text-center"></i> Overview
+      </div>
+      <div class="nav-item" onclick="showTab('customers')">
+        <i class="fas fa-users w-4 text-center"></i> Customers
+      </div>
+      <div class="nav-item" onclick="showTab('fbads')">
+        <i class="fab fa-facebook w-4 text-center"></i> FB Ads
+      </div>
+      <div class="nav-item" onclick="showTab('clarity')">
+        <i class="fas fa-eye w-4 text-center"></i> Clarity
+      </div>
+      <div class="nav-item" onclick="showTab('support')">
+        <i class="fas fa-comments w-4 text-center"></i> Support
+      </div>
+    </nav>
+
+    <div class="p-3 border-t border-zinc-800">
+      <button onclick="logout()" class="nav-item w-full text-left">
+        <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto bg-zinc-950">
+
+    <!-- ── OVERVIEW ── -->
+    <div id="tab-overview" class="tab active p-8">
+      <h2 class="text-xl font-bold mb-6">Overview</h2>
+
+      <div class="grid grid-cols-3 gap-5 mb-8">
+        <div class="stat-card">
+          <p class="text-zinc-400 text-xs font-medium uppercase tracking-wide mb-1">Total Revenue</p>
+          <p class="text-3xl font-bold" id="stat-total-revenue">—</p>
+          <p class="text-zinc-500 text-xs mt-1">all time</p>
+        </div>
+        <div class="stat-card">
+          <p class="text-zinc-400 text-xs font-medium uppercase tracking-wide mb-1">This Month</p>
+          <p class="text-3xl font-bold text-orange-400" id="stat-month-revenue">—</p>
+          <p class="text-zinc-500 text-xs mt-1" id="stat-month-customers">— customers</p>
+        </div>
+        <div class="stat-card">
+          <p class="text-zinc-400 text-xs font-medium uppercase tracking-wide mb-1">This Week</p>
+          <p class="text-3xl font-bold text-emerald-400" id="stat-week-revenue">—</p>
+          <p class="text-zinc-500 text-xs mt-1" id="stat-week-customers">— customers</p>
+        </div>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+          <h3 class="font-semibold">Recent Sales</h3>
+          <span class="text-zinc-500 text-sm" id="stat-total-customers-badge">—</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-zinc-800 text-xs text-zinc-500 uppercase tracking-wide">
+                <th class="text-left px-6 py-3">Customer</th>
+                <th class="text-left px-6 py-3">Date</th>
+                <th class="text-left px-6 py-3">Amount</th>
+                <th class="text-left px-6 py-3">Certificate Link</th>
+              </tr>
+            </thead>
+            <tbody id="overview-table" class="divide-y divide-zinc-800/50">
+              <tr><td colspan="4" class="px-6 py-8 text-center text-zinc-600">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CUSTOMERS ── -->
+    <div id="tab-customers" class="tab p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold">Customers</h2>
+        <div class="relative">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+          <input id="customer-search" type="text" placeholder="Search by email or name..."
+            class="bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 w-72"
+            oninput="filterCustomers()">
+        </div>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-zinc-800 text-xs text-zinc-500 uppercase tracking-wide">
+                <th class="text-left px-6 py-3">Email</th>
+                <th class="text-left px-6 py-3">Name</th>
+                <th class="text-left px-6 py-3">Date</th>
+                <th class="text-left px-6 py-3">Amount</th>
+                <th class="text-left px-6 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customers-table" class="divide-y divide-zinc-800/50">
+              <tr><td colspan="5" class="px-6 py-8 text-center text-zinc-600">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FB ADS ── -->
+    <div id="tab-fbads" class="tab p-8">
+      <h2 class="text-xl font-bold mb-2">Facebook Ads</h2>
+      <p class="text-zinc-400 text-sm mb-6">Pixel ID: <code class="bg-zinc-800 px-2 py-0.5 rounded text-orange-400">2087476122110906</code></p>
+
+      <div id="fb-connect-section" class="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 max-w-lg mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+            <i class="fab fa-facebook text-white"></i>
+          </div>
+          <div>
+            <p class="font-semibold">Connect Facebook Ads</p>
+            <p class="text-zinc-400 text-sm">Enter your access token to see live ad data</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <input id="fb-token" type="text" placeholder="Facebook Access Token"
+            class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500">
+          <input id="fb-account-id" type="text" placeholder="Ad Account ID (e.g. 123456789)"
+            class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500">
+          <button onclick="connectFacebook()"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all">
+            Connect
+          </button>
+        </div>
+        <p class="text-zinc-500 text-xs mt-3">Get your token from <a href="https://developers.facebook.com/tools/explorer/" target="_blank" class="text-blue-400 hover:text-blue-300">Graph API Explorer</a> — needs <code>ads_read</code> permission.</p>
+      </div>
+
+      <div id="fb-data-section" class="hidden space-y-5">
+        <div class="grid grid-cols-4 gap-5">
+          <div class="stat-card">
+            <p class="text-zinc-400 text-xs uppercase tracking-wide mb-1">Spend (30d)</p>
+            <p class="text-2xl font-bold" id="fb-spend">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="text-zinc-400 text-xs uppercase tracking-wide mb-1">Impressions</p>
+            <p class="text-2xl font-bold" id="fb-impressions">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="text-zinc-400 text-xs uppercase tracking-wide mb-1">Clicks</p>
+            <p class="text-2xl font-bold" id="fb-clicks">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="text-zinc-400 text-xs uppercase tracking-wide mb-1">Purchases</p>
+            <p class="text-2xl font-bold text-emerald-400" id="fb-purchases">—</p>
+          </div>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+          <div class="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+            <h3 class="font-semibold">Campaigns</h3>
+            <button onclick="disconnectFacebook()" class="text-zinc-500 hover:text-zinc-300 text-xs">Disconnect</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-zinc-800 text-xs text-zinc-500 uppercase tracking-wide">
+                  <th class="text-left px-6 py-3">Campaign</th>
+                  <th class="text-left px-6 py-3">Status</th>
+                  <th class="text-left px-6 py-3">Spend</th>
+                  <th class="text-left px-6 py-3">Clicks</th>
+                  <th class="text-left px-6 py-3">Purchases</th>
+                </tr>
+              </thead>
+              <tbody id="fb-campaigns-table" class="divide-y divide-zinc-800/50"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <a href="https://www.facebook.com/ads/manager/" target="_blank"
+        class="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium px-5 py-3 rounded-xl transition-all mt-2">
+        <i class="fab fa-facebook text-blue-400"></i>
+        Open Ads Manager
+        <i class="fas fa-external-link-alt text-xs text-zinc-500"></i>
+      </a>
+    </div>
+
+    <!-- ── CLARITY ── -->
+    <div id="tab-clarity" class="tab p-8">
+      <h2 class="text-xl font-bold mb-2">Microsoft Clarity</h2>
+      <p class="text-zinc-400 text-sm mb-6">Project ID: <code class="bg-zinc-800 px-2 py-0.5 rounded text-orange-400">xeku48rhlm</code></p>
+
+      <div class="grid grid-cols-2 gap-5 mb-6">
+        <div class="stat-card">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-purple-600 rounded-xl flex items-center justify-center">
+              <i class="fas fa-play text-white text-sm"></i>
+            </div>
+            <p class="font-semibold">Session Recordings</p>
+          </div>
+          <p class="text-zinc-400 text-sm">Watch real visitors navigating your site — every click, scroll, and rage click captured.</p>
+          <a href="https://clarity.microsoft.com/projects/view/xeku48rhlm/recordings" target="_blank"
+            class="inline-flex items-center gap-2 mt-4 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-all">
+            Watch Recordings <i class="fas fa-external-link-alt text-xs"></i>
+          </a>
+        </div>
+        <div class="stat-card">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-rose-600 rounded-xl flex items-center justify-center">
+              <i class="fas fa-fire text-white text-sm"></i>
+            </div>
+            <p class="font-semibold">Heatmaps</p>
+          </div>
+          <p class="text-zinc-400 text-sm">See exactly where visitors click, scroll to, and where they drop off before buying.</p>
+          <a href="https://clarity.microsoft.com/projects/view/xeku48rhlm/heatmaps" target="_blank"
+            class="inline-flex items-center gap-2 mt-4 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-all">
+            View Heatmaps <i class="fas fa-external-link-alt text-xs"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden" style="height:600px">
+        <div class="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+          <h3 class="font-semibold">Live Dashboard</h3>
+          <a href="https://clarity.microsoft.com/projects/view/xeku48rhlm" target="_blank"
+            class="text-zinc-400 hover:text-white text-xs flex items-center gap-1">
+            Open full screen <i class="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+        <iframe src="https://clarity.microsoft.com/projects/view/xeku48rhlm"
+          class="w-full h-full border-0"
+          title="Microsoft Clarity Dashboard">
+        </iframe>
+      </div>
+    </div>
+
+    <!-- ── SUPPORT ── -->
+    <div id="tab-support" class="tab p-8">
+      <h2 class="text-xl font-bold mb-2">Customer Support</h2>
+      <p class="text-zinc-400 text-sm mb-6">Tawk.to • Property: <code class="bg-zinc-800 px-2 py-0.5 rounded text-orange-400">6a424b5bd118e21d49b23e87</code></p>
+
+      <div class="grid grid-cols-3 gap-5 mb-6">
+        <div class="stat-card flex items-center gap-4">
+          <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-circle text-white text-xs"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Chat Widget</p>
+            <p class="text-emerald-400 text-xs">Live on chuckasickie.org</p>
+          </div>
+        </div>
+        <a href="https://app.tawk.to/#/dashboard" target="_blank"
+          class="stat-card flex items-center gap-4 hover:border-zinc-600 transition-colors cursor-pointer no-underline">
+          <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-inbox text-white text-sm"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Chat Inbox</p>
+            <p class="text-zinc-400 text-xs">Open Tawk.to inbox →</p>
+          </div>
+        </a>
+        <a href="https://app.tawk.to/#/reports" target="_blank"
+          class="stat-card flex items-center gap-4 hover:border-zinc-600 transition-colors cursor-pointer no-underline">
+          <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-chart-bar text-white text-sm"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Reports</p>
+            <p class="text-zinc-400 text-xs">View chat reports →</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden" style="height:600px">
+        <div class="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+          <h3 class="font-semibold">Live Chat Manager</h3>
+          <a href="https://app.tawk.to" target="_blank"
+            class="text-zinc-400 hover:text-white text-xs flex items-center gap-1">
+            Open full screen <i class="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+        <iframe src="https://app.tawk.to/#/dashboard"
+          class="w-full h-full border-0"
+          title="Tawk.to Dashboard">
+        </iframe>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const API = '/api/admin';
+  let allCustomers = [];
+
+  // ─── Auth ───
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    const err = document.getElementById('login-error');
+
+    try {
+      const res = await fetch(`${API}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.token) {
+        err.classList.remove('hidden');
+        return;
+      }
+
+      localStorage.setItem('admin_token', data.token);
+      err.classList.add('hidden');
+      showDashboard();
+    } catch {
+      err.textContent = 'Connection error. Try again.';
+      err.classList.remove('hidden');
+    }
+  });
+
+  function logout() {
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('fb_token');
+    localStorage.removeItem('fb_account_id');
+    document.getElementById('dashboard-page').classList.add('hidden');
+    document.getElementById('login-page').classList.remove('hidden');
+  }
+
+  function authHeaders() {
+    return { Authorization: `Bearer ${localStorage.getItem('admin_token')}` };
+  }
+
+  // ─── Init ───
+  window.onload = () => {
+    const token = localStorage.getItem('admin_token');
+    if (token) showDashboard();
+  };
+
+  async function showDashboard() {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('dashboard-page').classList.remove('hidden');
+    await loadDashboard();
+
+    // Auto-connect FB if previously saved
+    const savedToken = localStorage.getItem('fb_token');
+    const savedAccount = localStorage.getItem('fb_account_id');
+    if (savedToken && savedAccount) loadFacebookData(savedToken, savedAccount);
+  }
+
+  // ─── Dashboard data ───
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`${API}/dashboard`, { headers: authHeaders() });
+      if (res.status === 401) { logout(); return; }
+      const { stats, customers } = await res.json();
+      allCustomers = customers;
+
+      document.getElementById('stat-total-revenue').textContent = `$${stats.totalRevenue.toLocaleString('en-AU', { minimumFractionDigits: 0 })}`;
+      document.getElementById('stat-month-revenue').textContent = `$${stats.monthRevenue.toLocaleString('en-AU', { minimumFractionDigits: 0 })}`;
+      document.getElementById('stat-week-revenue').textContent = `$${stats.weekRevenue.toLocaleString('en-AU', { minimumFractionDigits: 0 })}`;
+      document.getElementById('stat-month-customers').textContent = `${stats.monthCustomers} customers`;
+      document.getElementById('stat-week-customers').textContent = `${stats.weekCustomers} customers`;
+      document.getElementById('stat-total-customers-badge').textContent = `${stats.totalCustomers} total`;
+
+      renderOverviewTable(customers.slice(0, 20));
+      renderCustomersTable(customers);
+    } catch (e) {
+      console.error('Dashboard load failed', e);
+    }
+  }
+
+  function formatDate(unix) {
+    return new Date(unix * 1000).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function renderOverviewTable(customers) {
+    const tbody = document.getElementById('overview-table');
+    if (!customers.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-zinc-600">No sales yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = customers.map(c => `
+      <tr class="hover:bg-zinc-800/30 transition-colors">
+        <td class="px-6 py-4">
+          <div class="font-medium text-sm">${c.email}</div>
+          <div class="text-zinc-500 text-xs">${c.name}</div>
+        </td>
+        <td class="px-6 py-4 text-zinc-400 text-sm">${formatDate(c.created)}</td>
+        <td class="px-6 py-4"><span class="text-emerald-400 font-semibold text-sm">$${c.amount.toFixed(2)}</span></td>
+        <td class="px-6 py-4">
+          <button onclick="copyLink('${c.session_id}')" class="text-xs text-zinc-400 hover:text-orange-400 flex items-center gap-1 transition-colors">
+            <i class="fas fa-copy"></i> Copy link
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderCustomersTable(customers) {
+    const tbody = document.getElementById('customers-table');
+    if (!customers.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-zinc-600">No customers yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = customers.map(c => `
+      <tr class="hover:bg-zinc-800/30 transition-colors">
+        <td class="px-6 py-4 text-sm font-medium">${c.email}</td>
+        <td class="px-6 py-4 text-zinc-400 text-sm">${c.name}</td>
+        <td class="px-6 py-4 text-zinc-400 text-sm">${formatDate(c.created)}</td>
+        <td class="px-6 py-4"><span class="text-emerald-400 font-semibold text-sm">$${c.amount.toFixed(2)}</span></td>
+        <td class="px-6 py-4 flex items-center gap-2">
+          <button onclick="copyLink('${c.session_id}')" class="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+            <i class="fas fa-copy"></i> Copy cert link
+          </button>
+          <a href="mailto:${c.email}" class="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+            <i class="fas fa-envelope"></i> Email
+          </a>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filterCustomers() {
+    const q = document.getElementById('customer-search').value.toLowerCase();
+    const filtered = allCustomers.filter(c =>
+      c.email.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+    );
+    renderCustomersTable(filtered);
+  }
+
+  function copyLink(sessionId) {
+    const url = `https://chuckasickie.org/?session_id=${sessionId}`;
+    navigator.clipboard.writeText(url);
+    // Brief feedback
+    event.target.closest('button').innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => event.target.closest('button').innerHTML = '<i class="fas fa-copy"></i> Copy link', 1500);
+  }
+
+  // ─── FB Ads ───
+  async function connectFacebook() {
+    const token = document.getElementById('fb-token').value.trim();
+    const accountId = document.getElementById('fb-account-id').value.trim().replace('act_', '');
+    if (!token || !accountId) return alert('Enter both token and account ID');
+
+    localStorage.setItem('fb_token', token);
+    localStorage.setItem('fb_account_id', accountId);
+    await loadFacebookData(token, accountId);
+  }
+
+  async function loadFacebookData(token, accountId) {
+    try {
+      // Account-level insights
+      const insightsRes = await fetch(
+        `https://graph.facebook.com/v18.0/act_${accountId}/insights?fields=spend,impressions,clicks,actions&date_preset=last_30d&access_token=${token}`
+      );
+      const insights = await insightsRes.json();
+
+      if (insights.error) {
+        alert('Facebook API error: ' + insights.error.message);
+        return;
+      }
+
+      const d = insights.data?.[0] || {};
+      const purchases = (d.actions || []).find(a => a.action_type === 'purchase')?.value || '0';
+
+      document.getElementById('fb-spend').textContent = `$${parseFloat(d.spend || 0).toFixed(0)}`;
+      document.getElementById('fb-impressions').textContent = parseInt(d.impressions || 0).toLocaleString();
+      document.getElementById('fb-clicks').textContent = parseInt(d.clicks || 0).toLocaleString();
+      document.getElementById('fb-purchases').textContent = purchases;
+
+      // Campaigns
+      const campsRes = await fetch(
+        `https://graph.facebook.com/v18.0/act_${accountId}/campaigns?fields=name,status,insights{spend,clicks,actions}&date_preset=last_30d&access_token=${token}`
+      );
+      const camps = await campsRes.json();
+
+      const tbody = document.getElementById('fb-campaigns-table');
+      tbody.innerHTML = (camps.data || []).map(c => {
+        const ci = c.insights?.data?.[0] || {};
+        const purch = (ci.actions || []).find(a => a.action_type === 'purchase')?.value || '0';
+        const statusColor = c.status === 'ACTIVE' ? 'text-emerald-400' : 'text-zinc-500';
+        return `
+          <tr class="hover:bg-zinc-800/30 transition-colors">
+            <td class="px-6 py-4 text-sm font-medium">${c.name}</td>
+            <td class="px-6 py-4 text-sm ${statusColor}">${c.status}</td>
+            <td class="px-6 py-4 text-sm text-zinc-300">$${parseFloat(ci.spend || 0).toFixed(2)}</td>
+            <td class="px-6 py-4 text-sm text-zinc-300">${parseInt(ci.clicks || 0).toLocaleString()}</td>
+            <td class="px-6 py-4 text-sm text-emerald-400 font-semibold">${purch}</td>
+          </tr>
+        `;
+      }).join('') || '<tr><td colspan="5" class="px-6 py-8 text-center text-zinc-600">No campaigns found.</td></tr>';
+
+      document.getElementById('fb-connect-section').classList.add('hidden');
+      document.getElementById('fb-data-section').classList.remove('hidden');
+    } catch (e) {
+      alert('Failed to load Facebook data. Check your token and account ID.');
+    }
+  }
+
+  function disconnectFacebook() {
+    localStorage.removeItem('fb_token');
+    localStorage.removeItem('fb_account_id');
+    document.getElementById('fb-data-section').classList.add('hidden');
+    document.getElementById('fb-connect-section').classList.remove('hidden');
+  }
+
+  // ─── Tab switching ───
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
