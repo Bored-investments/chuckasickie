@@ -10,11 +10,9 @@ async function generateToken(secret) {
 
 export async function onRequest(context) {
   const headers = { 'Content-Type': 'application/json' };
-
   if (context.request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
+    return new Response('', { status: 405 });
   }
-
   try {
     const { username, password } = await context.request.json();
     if (username !== 'kangaroo' || password !== 'jack') {

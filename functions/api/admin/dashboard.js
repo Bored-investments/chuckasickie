@@ -1,7 +1,28 @@
-export async function onRequestGet(context) {
+async function authorized(request, secret) {
+  const auth = request.headers.get('Authorization') || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  if (!token) return false;
+  const parts = token.split('.');
+  if (parts.length !== 2) return false;
+  try {
+    const data = JSON.parse(atob(parts[0]));
+    if (data.exp < Date.now()) return false;
+  } catch { return false; }
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
+  );
+  const sigBytes = Uint8Array.from(atob(parts[1]), c => c.charCodeAt(0));
+  return crypto.subtle.verify('HMAC', key, sigBytes, new TextEncoder().encode(parts[0]));
+}
+
+export async function onRequest(context) {
   const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
 
-  // Paginate through all completed Stripe checkout sessions
+  if (!await authorized(context.request, context.env.ADMIN_SECRET)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
+  }
+
   let allSessions = [];
   let startingAfter = null;
 
@@ -40,9 +61,7 @@ export async function onRequestGet(context) {
 
   return new Response(JSON.stringify({
     stats: {
-      totalRevenue,
-      monthRevenue,
-      weekRevenue,
+      totalRevenue, monthRevenue, weekRevenue,
       totalCustomers: allSessions.length,
       monthCustomers: allSessions.filter(s => s.created > thirtyDaysAgo).length,
       weekCustomers: allSessions.filter(s => s.created > sevenDaysAgo).length,
