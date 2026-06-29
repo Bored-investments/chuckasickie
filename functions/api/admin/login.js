@@ -8,8 +8,13 @@ async function generateToken(secret) {
   return `${payload}.${btoa(String.fromCharCode(...new Uint8Array(sig)))}`;
 }
 
-export async function onRequestPost(context) {
+export async function onRequest(context) {
   const headers = { 'Content-Type': 'application/json' };
+
+  if (context.request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
+  }
+
   try {
     const { username, password } = await context.request.json();
     if (username !== 'kangaroo' || password !== 'jack') {
