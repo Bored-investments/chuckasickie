@@ -484,6 +484,12 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
         
         <!-- Generator section (hidden by default) -->
         <div id="generator" class="hidden">
+        <div id="payment-verifying" class="hidden mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-center">
+            <div class="flex flex-col items-center justify-center gap-2">
+                <p class="font-semibold">⏳ Verifying your payment...</p>
+                <p class="text-sm text-blue-700">Just a moment while we confirm your order.</p>
+            </div>
+        </div>
         <div id="payment-success" class="hidden mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-center">
     
     <div class="flex flex-col items-center justify-center gap-2">
@@ -622,16 +628,9 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
-            // Stronger version - completely removes landing after successful payment
-            window.onload = function() {
+            window.onload = async function() {
     const urlParams = new URLSearchParams(window.location.search);
-    const isPaidSuccess = urlParams.get('paid') === 'success';
-
-    // ✅ ADD THIS HERE
-    if (isPaidSuccess) {
-        document.body.classList.add('customer-mode');
-        fbq('track', 'Purchase', {value: 25.00, currency: 'AUD'});
-    }
+    const sessionId = urlParams.get('session_id');
 
     // Set default dates
     const today = new Date();
@@ -643,14 +642,35 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
     tomorrow.setDate(today.getDate() + 1);
     document.getElementById('leave-end').value = tomorrow.toISOString().substr(0, 10);
 
+    let isPaidSuccess = false;
+
+    if (sessionId) {
+        // Show verifying state
+        const verifyBanner = document.getElementById('payment-verifying');
+        if (verifyBanner) verifyBanner.classList.remove('hidden');
+
+        try {
+            const res = await fetch(`/api/verify?session_id=${encodeURIComponent(sessionId)}`);
+            const data = await res.json();
+            isPaidSuccess = data.valid === true;
+        } catch (e) {
+            isPaidSuccess = false;
+        }
+
+        if (verifyBanner) verifyBanner.classList.add('hidden');
+
+        if (isPaidSuccess) {
+            document.body.classList.add('customer-mode');
+            fbq('track', 'Purchase', {value: 25.00, currency: 'AUD'});
+        }
+    }
+
     if (isPaidSuccess) {
         const landing = document.getElementById('landing');
         if (landing) landing.remove();
 
         const successBanner = document.getElementById('payment-success');
-        if (successBanner) {
-        successBanner.classList.remove('hidden');
-        }
+        if (successBanner) successBanner.classList.remove('hidden');
 
         const backBtn = document.getElementById('back-to-landing');
         if (backBtn) backBtn.remove();
@@ -660,6 +680,11 @@ src="https://www.facebook.com/tr?id=2087476122110906&ev=PageView&noscript=1"
 
         window.scrollTo({ top: 0, behavior: 'instant' });
         document.getElementById('patient-name').focus();
+    } else if (sessionId) {
+        // session_id present but payment not verified — show error
+        const landing = document.getElementById('landing');
+        if (landing) landing.classList.remove('hidden');
+        alert('We could not verify your payment. Please contact hello@chuckasickie.org if you were charged.');
     }
 
     attachEventListeners();
